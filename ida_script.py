@@ -4,6 +4,7 @@ import idc
 import functools
 import datetime
 import threading
+import types
 import xmlrpclib
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 
@@ -34,14 +35,21 @@ def wrap(f):
     def wrapper(*a, **kw):
         try:
             rv = []
-            def work(): rv.append(f(*a,**kw))
+            def work(): 
+                print(f,a,kw)
+                rv.append(f(*a,**kw))
             with mutex:
                 flags = idaapi.MFF_WRITE
                 if f == idc.SetColor:
                     flags |= idaapi.MFF_NOWAIT
                     rv.append(None)
                 idaapi.execute_sync(work, flags)
-            return rv[0]
+            retval = rv[0]
+
+            if isinstance(retval, types.GeneratorType):
+                retval = list(retval)
+
+            return retval
         except:
             import traceback
             traceback.print_exc()

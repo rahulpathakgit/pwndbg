@@ -60,6 +60,12 @@ class withIDA(object):
             return self.fn(*args, **kwargs)
         return None
 
+@pwndbg.events.stop
+@withIDA
+def initial_setup():
+    for function in _ida.Functions():
+        GetFunctionName(function)
+
 def takes_address(function):
     @functools.wraps(function)
     def wrapper(address, *args, **kwargs):
@@ -76,10 +82,12 @@ def returns_address(function):
 def available():
     return True
 
+@pwndbg.memoize.reset_on_objfile
 def l2r(addr):
     result = (addr - int(pwndbg.elf.exe().address) + base()) & pwndbg.arch.ptrmask
     return result
 
+@pwndbg.memoize.reset_on_objfile
 def r2l(addr):
     result = (addr - base() + int(pwndbg.elf.exe().address)) & pwndbg.arch.ptrmask
     return result
@@ -93,6 +101,7 @@ def base():
 
 @withIDA
 @takes_address
+@pwndbg.memoize.reset_on_objfile
 def Comment(addr):
     addr = l2r(addr)
     return _ida.GetCommentEx(addr, 0) or _ida.GetCommentEx(addr)
@@ -187,6 +196,7 @@ def UpdateBreakpoints():
 @withIDA
 @takes_address
 def SetColor(pc, color):
+    return False
     return _ida.SetColor(pc, 1, color)
 
 
