@@ -1,3 +1,4 @@
+from __future__ import print_function
 import bz2
 import datetime
 import os
@@ -16,8 +17,8 @@ def j(*args):
     """
     Synchronize IDA's cursor with GDB
     """
-    pc = int(gdb.selected_frame().pc())
-    pwndbg.ida.Jump(pc)
+    # pc = int(gdb.selected_frame().pc())
+    # pwndbg.ida.Jump(pc)
 
 
 if pwndbg.ida.available():
@@ -74,7 +75,7 @@ def save_ida():
     basename = os.path.basename(path)
     dirname = os.path.dirname(path)
     backups = os.path.join(dirname, 'ida-backup')
-    
+
     if not os.path.isdir(backups):
         os.mkdir(backups)
 
@@ -90,7 +91,7 @@ def save_ida():
     pwndbg.ida.SaveBase(full_path)
 
     data = open(full_path, 'rb').read()
-    
+
     # Compress!
     full_path_compressed = full_path + '.bz2'
     bz2.BZ2File(full_path_compressed, 'w').write(data)
@@ -104,7 +105,14 @@ class ida(gdb.Function):
     def __init__(self):
         super(ida, self).__init__('ida')
     def invoke(self, name):
-        return pwndbg.ida.LocByName(name.string())
+        name   = name.string()
+        result = pwndbg.ida.LocByName(name)
+
+        if 0xffffe000 <= result <= 0xffffffff \
+        or 0xffffffffffffe000 <= result <= 0xffffffffffffffff:
+            raise ValueError("ida.LocByName(%r) == BADADDR" % name)
+
+        return result
 
 ida()
 save_ida()

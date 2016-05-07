@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import gdb
 import sys
 import pwndbg.arch
@@ -107,7 +108,6 @@ set prompt %s
 set height 0
 set history expansion on
 set history save on
-set disassembly-flavor intel
 set follow-fork-mode child
 set backtrace past-main on
 set step-mode on

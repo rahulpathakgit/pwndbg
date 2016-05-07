@@ -4,6 +4,7 @@
 Allows describing functions, specifically enumerating arguments which
 may be passed in a combination of registers and stack values.
 """
+from __future__ import print_function
 import gdb
 import pwndbg.abi
 import pwndbg.arch
@@ -90,8 +91,8 @@ def get(instruction):
         # Get the syscall number and name
         abi = pwndbg.abi.ABI.syscall()
 
-        print(abi)
-        print(abi.register_arguments)
+        # print(abi)
+        # print(abi.register_arguments)
 
         target  = None
         syscall = getattr(pwndbg.regs, abi.syscall_register)
