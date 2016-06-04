@@ -171,7 +171,7 @@ powerpc = RegisterSet(  retaddr = ('lr','r0'),
 # %o0 == %r8                          \
 # ...                                 | o stands for output (note: not 0)
 # %o6 == %r14 == %sp (stack ptr)      |
-# %o7 == %r15 == for return address   |
+# %o7 == %r15 == for return aaddress   |
 # ____________________________________/
 # %l0 == %r16                         \
 # ...                                 | l stands for local (note: not 1)
@@ -345,18 +345,6 @@ class module(ModuleType):
         for regname in self.all:
             yield regname, self[regname]
 
-    @property
-    def arguments(self):
-        argnames = arch_to_regs[pwndbg.arch.current].args
-        retval   = []
-        for arg in argnames:
-            val = self[arg]
-            if val is None:
-                try:    val = gdb.parse_and_eval(arg)
-                except: val = '???'
-            retval.append(val)
-        return retval
-
     arch_to_regs = arch_to_regs
 
     @property
@@ -377,6 +365,7 @@ class module(ModuleType):
     def gsbase(self):
         return self._fs_gs_helper(ARCH_GET_GS)
 
+    @pwndbg.memoize.reset_on_stop
     def _fs_gs_helper(self, which):
         """Supports fetching based on segmented addressing, a la fs:[0x30].
 

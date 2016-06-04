@@ -42,6 +42,7 @@ for c in bytearray((string.ascii_letters + string.digits + string.punctuation).e
 
 printable[-1] = ' '
 
+
 def hexdump(data, address = 0, width = 16, skip = True):
     data = list(bytearray(data))
     base = address
@@ -51,7 +52,7 @@ def hexdump(data, address = 0, width = 16, skip = True):
         if skip and line == last_line:
             if not skipping:
                 skipping = True
-                yield '*'
+                yield '...'
             continue
         else:
             skipping  = False

@@ -20,14 +20,14 @@ HEAP  = BLUE
 CODE  = RED
 DATA  = PURPLE
 
-def normal(x): return NORMAL + x
-def bold(x): return BOLD + x + NORMAL
-def red(x): return RED + x + NORMAL
-def blue(x): return BLUE + x + NORMAL
-def gray(x): return GRAY + x + NORMAL
-def green(x): return GREEN + x + NORMAL
-def yellow(x): return YELLOW + x + NORMAL
-def underline(x): return UNDERLINE + x + NORMAL
+def normal(x): return NORMAL + str(x)
+def bold(x): return BOLD + str(x) + NORMAL
+def red(x): return RED + str(x) + NORMAL
+def blue(x): return BLUE + str(x) + NORMAL
+def gray(x): return GRAY + str(x) + NORMAL
+def green(x): return GREEN + str(x) + NORMAL
+def yellow(x): return YELLOW + str(x) + NORMAL
+def underline(x): return UNDERLINE + str(x) + NORMAL
 
 def get(address, text = None):
     """
@@ -38,6 +38,8 @@ def get(address, text = None):
         text(str): Optional text to use in place of the address
               in the return value string.
     """
+    address = int(address)
+
     page = pwndbg.vmmap.find(int(address))
 
     if page is None:                 color = NORMAL
@@ -53,7 +55,7 @@ def get(address, text = None):
     if text is None and isinstance(address, (long, int)) and address > 255:
         text = hex(int(address))
     if text is None:
-        text = int(address)
+        text = str(int(address))
 
     if color == NORMAL:
         return text
@@ -69,4 +71,3 @@ def legend():
         UNDERLINE + 'RWX' + NORMAL,
         'RODATA'
     ))
-

@@ -224,6 +224,12 @@ def save_signal(signal):
 
     elif isinstance(signal, gdb.SignalEvent):
         msg = 'Program received signal %s' % signal.stop_signal
+        if signal.stop_signal == 'SIGSEGV':
+            try:
+                si_addr = gdb.parse_and_eval("$_siginfo._sifields._sigfault.si_addr")
+                msg += ' (fault address %#x)' % int(si_addr or 0)
+            except gdb.error:
+                pass
         msg = pwndbg.color.red(msg)
         msg = pwndbg.color.bold(msg)
         result.append(msg)

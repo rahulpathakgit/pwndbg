@@ -11,8 +11,8 @@ import pwndbg.compat
 import pwndbg.vmmap
 
 
-@pwndbg.commands.OnlyWhenRunning
 @pwndbg.commands.QuietSloppyParsedCommand
+@pwndbg.commands.OnlyWhenRunning
 def vmmap(map=None):
     """
     Print the virtal memory map, or the specific mapping for the
@@ -36,11 +36,3 @@ def vmmap(map=None):
             continue
 
         print(pwndbg.color.get(page.vaddr, text=str(page)))
-
-@pwndbg.commands.OnlyWhenRunning
-@pwndbg.commands.QuietSloppyParsedCommand
-def elfheader(map=None):
-    """
-    Provides PEDA compatibility.  See vmmap command.
-    """
-    return vmmap(map)
