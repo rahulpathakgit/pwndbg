@@ -5,11 +5,13 @@ Commands for setting temporary breakpoints on the next
 instruction of some type (call, branch, etc.)
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
+import capstone
+
 import gdb
 import pwndbg.disasm
 import pwndbg.regs
-
-import capstone
 
 jumps = set((
     capstone.CS_GRP_CALL,
@@ -90,5 +92,3 @@ def break_on_next(address=None):
 
     gdb.Breakpoint("*%#x" % (ins.address + ins.size), temporary=True)
     gdb.execute('continue', from_tty=False, to_string=True)
-
-

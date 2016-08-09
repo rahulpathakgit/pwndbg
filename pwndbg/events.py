@@ -6,14 +6,17 @@ when various events occur to the debuggee (e.g. STOP on SIGINT)
 by using a decorator.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import functools
 import sys
 import traceback
 
 import gdb
+import pwndbg.config
 import pwndbg.stdio
 
-debug = False
+debug = pwndbg.config.Parameter('debug-events', False, 'display internal event debugging info')
 pause = 0
 
 
@@ -45,7 +48,7 @@ class StartEvent(object):
         for function in self.registered:
             function()
 
-    def on_stop(self):
+    def on_exited(self):
         self.running = False
 
 gdb.events.start = StartEvent()
@@ -57,6 +60,13 @@ registered = {gdb.events.exited: [],
               gdb.events.new_objfile: [],
               gdb.events.stop: [],
               gdb.events.start: []}
+
+# GDB 7.9 and above only
+try:
+    registered[gdb.events.memory_changed] = []
+    registered[gdb.events.register_changed] = []
+except (NameError, AttributeError):
+    pass
 
 class Pause(object):
     def __enter__(self, *a, **kw):
@@ -109,7 +119,16 @@ def cont(func):        return connect(func, gdb.events.cont, 'cont')
 def new_objfile(func): return connect(func, gdb.events.new_objfile, 'obj')
 def stop(func):        return connect(func, gdb.events.stop, 'stop')
 def start(func):       return connect(func, gdb.events.start, 'start')
-
+def reg_changed(func):
+    try:
+        return connect(func, gdb.events.register_changed, 'reg_changed')
+    except Exception:
+        return func
+def mem_changed(func):
+    try:
+        return connect(func, gdb.events.memory_changed, 'mem_changed')
+    except Exception:
+        return func
 
 def log_objfiles(ofile=None):
     if not (debug and ofile):
@@ -124,11 +143,11 @@ gdb.events.new_objfile.connect(log_objfiles)
 
 def after_reload():
     if gdb.selected_inferior().pid:
+        for f in registered[gdb.events.stop]:
+            f()
         for f in registered[gdb.events.start]:
             f()
         for f in registered[gdb.events.new_objfile]:
-            f()
-        for f in registered[gdb.events.stop]:
             f()
 
 def on_reload():
@@ -141,9 +160,9 @@ def on_reload():
 def _start_newobjfile():
     gdb.events.start.on_new_objfile()
 
-@stop
+@exit
 def _start_stop():
-    gdb.events.start.on_stop()
+    gdb.events.start.on_exited()
 
 @exit
 def _reset_objfiles():

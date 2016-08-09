@@ -5,6 +5,8 @@ Functionality for resolving ASCII printable strings within
 the debuggee's address space.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import string
 
 import gdb
@@ -42,6 +44,6 @@ def get(address, maxlen = None):
         return None
 
     if len(sz) < maxlen:
-    	return sz
+        return sz
 
     return sz[:maxlen] + '...'

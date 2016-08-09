@@ -1,14 +1,15 @@
 from __future__ import print_function
-import gdb
+from __future__ import unicode_literals
+
 import errno as _errno
 import struct
-import pwndbg as _pwndbg
 
+import gdb
+import pwndbg as _pwndbg
 import pwndbg.arch as _arch
 import pwndbg.commands
-import pwndbg.symbol
 import pwndbg.regs
-
+import pwndbg.symbol
 
 _errno.errorcode[0] = 'OK'
 

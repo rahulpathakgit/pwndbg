@@ -1,9 +1,7 @@
 from __future__ import print_function
-import idaapi
-import idautils
-import idc
-import functools
+
 import datetime
+import functools
 import threading
 import xmlrpclib
 from SimpleXMLRPCServer import SimpleXMLRPCServer
@@ -11,6 +9,9 @@ from SimpleXMLRPCServer import SimpleXMLRPCServer
 import idaapi
 import idautils
 import idc
+
+# Wait for any processing to get done
+idaapi.autoWait()
 
 # Save the database so nothing gets lost.
 idc.SaveBase(idc.GetIdbPath() + '.' + datetime.datetime.now().isoformat())

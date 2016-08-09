@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import argparse
 import functools
+import sys
 import traceback
-import gdb
 
+import gdb
 import pwndbg.chain
 import pwndbg.color
 import pwndbg.enhance
@@ -15,9 +18,6 @@ import pwndbg.regs
 import pwndbg.stdio
 import pwndbg.symbol
 import pwndbg.ui
-
-import sys
-
 
 debug = True
 

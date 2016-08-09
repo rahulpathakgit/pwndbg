@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import capstone
+
 import pwndbg.chain
 import pwndbg.color
 import pwndbg.disasm.jump
@@ -48,7 +51,6 @@ def instruction(ins):
             # XXX: not sure when this ever happens
             asm += '<-- file a pwndbg bug for this'
         else:
-            colored_addr = pwndbg.color.get(ins.symbol_addr)
             asm = asm.replace(hex(ins.symbol_addr), ins.symbol)
             asm = '%-36s <%s>' % (asm, pwndbg.color.get(ins.symbol_addr))
 
@@ -57,7 +59,9 @@ def instruction(ins):
         asm = asm.replace(ins.mnemonic, pwndbg.color.bold(ins.mnemonic))
 
     # If we know the conditional is taken, mark it as green.
-    if ins.condition:
+    if ins.condition is None:
+        asm = '  ' + asm
+    elif ins.condition:
         asm = pwndbg.color.green(u'✔ ') + asm
     else:
         asm = '  ' + asm

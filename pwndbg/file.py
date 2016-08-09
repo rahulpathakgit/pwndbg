@@ -6,6 +6,8 @@ debugging a remote process over SSH or similar, where e.g.
 /proc/FOO/maps is needed from the remote system.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import binascii
 import errno as _errno
 import os
@@ -16,13 +18,13 @@ import pwndbg.qemu
 import pwndbg.remote
 
 
-def get(path, recurse=1):
+def get_file(path, recurse=1):
     """
-    Retrieves the contents of the specified file on the system
-    where the current process is being debugged.
+    Downloads the specified file from the system where the current process is
+    being debugged.
 
     Returns:
-        A byte array, or None.
+        The local path to the file
     """
     local_path = path
 
@@ -40,6 +42,18 @@ def get(path, recurse=1):
         if error:
             raise OSError("Could not download remote file %r:\n" \
                             "Error: %s" % (path, error))
+
+    return local_path
+
+def get(path, recurse=1):
+    """
+    Retrieves the contents of the specified file on the system
+    where the current process is being debugged.
+
+    Returns:
+        A byte array, or None.
+    """
+    local_path = get_file(path, recurse)
 
     try:
         with open(local_path,'rb') as f:

@@ -1,9 +1,13 @@
 from __future__ import print_function
+from __future__ import unicode_literals
+
+import collections
+
+import capstone
+from capstone import *
+
 import pwndbg.memoize
 import pwndbg.symbol
-import capstone
-import collections
-from capstone import *
 
 CS_OP_IMM
 

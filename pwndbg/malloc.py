@@ -6,6 +6,8 @@ Describes the EGLIBC heap mechanisms.
 Work-in-progress.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import pwndbg.arch
 import pwndbg.events
 
@@ -14,7 +16,7 @@ malloc_chunk  = None
 
 @pwndbg.events.new_objfile
 def load_malloc_chunk():
-	malloc_chunk = None
+    malloc_chunk = None
 
 
 def chunk2mem(p):

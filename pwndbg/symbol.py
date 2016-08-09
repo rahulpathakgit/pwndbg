@@ -8,15 +8,19 @@ Uses IDA when available if there isn't sufficient symbol
 information available.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
+import os
+import re
+import tempfile
 
 import elftools.common.exceptions
 import elftools.elf.constants
 import elftools.elf.elffile
 import elftools.elf.segments
+import six
+
 import gdb
-import re
-import os
-import tempfile
 import pwndbg.elf
 import pwndbg.events
 import pwndbg.file
@@ -27,6 +31,7 @@ import pwndbg.qemu
 import pwndbg.remote
 import pwndbg.stack
 import pwndbg.vmmap
+
 
 def get_directory():
     """
@@ -133,13 +138,13 @@ def autofetch():
         except elftools.common.exceptions.ELFError:
             continue
 
-        gdb_command = ['add-symbol-file', local_path, hex(base)]
+        gdb_command = ['add-symbol-file', local_path, hex(int(base))]
         for section in elf.iter_sections():
             name = section.name.decode('latin-1')
             section = section.header
             if not section.sh_flags & elftools.elf.constants.SH_FLAGS.SHF_ALLOC:
                 continue
-            gdb_command += ['-s', name, hex(base + section.sh_addr)]
+            gdb_command += ['-s', name, hex(int(base + section.sh_addr))]
 
         print(' '.join(gdb_command))
         # gdb.execute(' '.join(gdb_command), from_tty=False, to_string=True)
@@ -186,7 +191,7 @@ def get(address, gdb_only=False):
 
 @pwndbg.memoize.reset_on_objfile
 def address(symbol):
-    if isinstance(symbol, (int,long)):
+    if isinstance(symbol, six.integer_types):
         return symbol
 
     try:

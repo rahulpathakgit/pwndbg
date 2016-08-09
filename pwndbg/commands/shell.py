@@ -4,12 +4,16 @@
 Wrapper for shell commands.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import os
 
 import gdb
 import pwndbg.commands
+import pwndbg.which
 
 shellcmds = [
+    "asm", # pwntools
     "awk",
     "bash",
     "cat",
@@ -17,9 +21,12 @@ shellcmds = [
     "chmod",
     "chown",
     # "clear",
+    "constgrep", # pwntools
     "cp",
+    "cyclic", # pwntools
     "date",
     "diff",
+    "disasm", # pwntools
     "egrep",
     "find",
     "grep",
@@ -52,6 +59,7 @@ shellcmds = [
     "tail",
     "top",
     "touch",
+    "unhex", # pwntools
     "uniq",
     "vi",
     "vim",
@@ -62,13 +70,15 @@ shellcmds = [
     "zsh",
 ]
 
+shellcmds = filter(pwndbg.which.which, shellcmds)
+
 def register_shell_function(cmd):
     def handler(*a):
         """Invokes %s""" % cmd
         if os.fork() == 0:
             os.execvp(cmd, (cmd,) + a)
         os.wait()
-    handler.__name__ = cmd
+    handler.__name__ = str(cmd)
     pwndbg.commands.Command(handler, False)
 
 for cmd in shellcmds:

@@ -1,6 +1,8 @@
 from __future__ import print_function
-import pwndbg.heap.heap
+from __future__ import unicode_literals
+
 import pwndbg.heap.dlmalloc
+import pwndbg.heap.heap
 import pwndbg.heap.ptmalloc
 
 current = pwndbg.heap.heap.Heap()

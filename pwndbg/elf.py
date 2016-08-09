@@ -8,6 +8,7 @@ This is necessary for when access to /proc is restricted, or when
 working on a BSD system which simply does not have /proc.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import os
 import re
@@ -22,7 +23,6 @@ import pwndbg.memoize
 import pwndbg.memory
 import pwndbg.proc
 import pwndbg.stack
-
 from pwndbg.elftypes import *
 
 # ELF constants
@@ -49,7 +49,9 @@ def exe():
     Return a loaded ELF header object pointing to the Ehdr of the
     main executable.
     """
-    return load(entry())
+    e = entry()
+    if e:
+        return load(e)
 
 @pwndbg.proc.OnlyWhenRunning
 @pwndbg.memoize.reset_on_start
@@ -77,7 +79,7 @@ def entry():
     # Try common names
     for name in ['_start', 'start', '__start', 'main']:
         try:
-            return pwndbg.symbol.get(name)
+            return pwndbg.symbol.address(name)
         except gdb.error:
             pass
 

@@ -1,9 +1,12 @@
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import gdb
 import pwndbg.color
 import pwndbg.events
 import pwndbg.file
 import pwndbg.remote
+
 
 def is_android():
     try:

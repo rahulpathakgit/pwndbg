@@ -1,7 +1,10 @@
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import gdb
-import pwndbg.regs
 import pwndbg.commands
+import pwndbg.regs
+
 
 class segment(gdb.Function):
     """Get the flat address of memory based off of the named segment register.
@@ -22,7 +25,7 @@ def fsbase():
     """
     Prints out the FS base address.  See also $fsbase.
     """
-    print(hex(pwndbg.regs.fsbase))
+    print(hex(int(pwndbg.regs.fsbase)))
 
 
 @pwndbg.commands.ParsedCommand
@@ -31,4 +34,4 @@ def gsbase():
     """
     Prints out the GS base address.  See also $gsbase.
     """
-    print(hex(pwndbg.regs.gsbase))
+    print(hex(int(pwndbg.regs.gsbase)))

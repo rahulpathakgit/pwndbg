@@ -1,13 +1,15 @@
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import os
 import string
 
 import gdb
 import pwndbg.auxv
 import pwndbg.commands
+import pwndbg.file
 import pwndbg.memoize
 import pwndbg.net
-import pwndbg.file
 import pwndbg.proc
 
 try:

@@ -1,8 +1,6 @@
 from __future__ import print_function
-try:
-    from __builtins__ import reload as _reload
-except:
-    from imp import reload as _reload
+from __future__ import unicode_literals
+
 import imp
 import os
 import sys
@@ -13,6 +11,12 @@ import pwndbg
 import pwndbg.commands
 import pwndbg.events
 import pwndbg.memoize
+
+try:
+    from __builtins__ import reload as _reload
+except:
+    from imp import reload as _reload
+
 
 
 def rreload(module, mdict=None):

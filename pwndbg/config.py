@@ -17,37 +17,51 @@ module, for example:
     >>> int(pwndbg.config.example_value)
     7
 """
-import gdb
+from __future__ import unicode_literals
+
 import sys
 import types
+import collections
 
-TYPES = {
-    # The value is an integer. 
-    # This is like PARAM_INTEGER, except 0 is interpreted as itself.
-    int: gdb.PARAM_ZINTEGER,
- 
-    # The value is a string. 
-    # When the user modifies the string, any escape sequences, 
-    # such as ‘\t’, ‘\f’, and octal escapes, are translated into 
-    # corresponding characters and encoded into the current host charset.
-    str: gdb.PARAM_STRING,
+import six
 
-    # The value is a plain boolean. 
-    # The Python boolean values, True and False are the only valid values.
-    bool: gdb.PARAM_BOOLEAN
-}
+import gdb
+
+TYPES = collections.OrderedDict()
+
+# The value is a plain boolean.
+# The Python boolean values, True and False are the only valid values.
+TYPES[bool] = gdb.PARAM_BOOLEAN
+
+# The value is an integer.
+# This is like PARAM_INTEGER, except 0 is interpreted as itself.
+for type in six.integer_types:
+    TYPES[type] = gdb.PARAM_ZINTEGER
+
+# The value is a string.
+# When the user modifies the string, any escape sequences,
+# such as ‘\t’, ‘\f’, and octal escapes, are translated into
+# corresponding characters and encoded into the current host charset.
+for type in six.string_types:
+    TYPES[type] = gdb.PARAM_STRING
+
+def getParam(value):
+    for k,v in TYPES.items():
+        if isinstance(value, k):
+            return v
 
 class Parameter(gdb.Parameter):
 
     def __init__(self, name, default, docstring):
         self.docstring = docstring.strip()
+        self.optname = name
         self.name = name.replace('-','_')
         self.default = default
         self.set_doc   = 'Set ' + docstring
         self.show_doc  = docstring + ':'
         super(Parameter, self).__init__(name,
                                         gdb.COMMAND_SUPPORT,
-                                        TYPES[type(default)])
+                                        getParam(default))
         self.value = default
 
         setattr(module, self.name, self)
@@ -62,6 +76,9 @@ class Parameter(gdb.Parameter):
         return str(self.value)
     def __bool__(self):
         return bool(self.value)
+
+    # Python2 compatibility
+    __nonzero__ = __bool__
 
 class ConfigModule(types.ModuleType):
     def __init__(self, name, module):

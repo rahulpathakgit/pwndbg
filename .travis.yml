@@ -1,0 +1,22 @@
+sudo: required
+dist: trusty
+branches:
+  only:
+    - master
+    - dev
+language: python
+cache:
+    - pip
+    - directories:
+        - /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages/
+        - /home/travis/virtualenv/python2.7.9/bin/
+        - capstone
+        - unicorn
+install:
+  - sudo apt-get -y install gdb
+  - lsb_release -a
+  - pip install -r requirements.txt
+  - sudo ./setup.sh
+before_script:
+  - isort --check-only --diff pwndbg
+script: nosetests ./tests/

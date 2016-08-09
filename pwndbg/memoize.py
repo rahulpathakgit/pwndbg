@@ -6,6 +6,7 @@ e.g. execution stops because of a SIGINT or breakpoint, or a
 new library/objfile are loaded, etc.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import collections
 import copy
@@ -71,6 +72,8 @@ class reset_on_stop(memoize):
 
     @staticmethod
     @pwndbg.events.stop
+    @pwndbg.events.mem_changed
+    @pwndbg.events.reg_changed
     def __reset_on_stop():
         for obj in reset_on_stop.caches:
             obj.cache.clear()
@@ -147,9 +150,9 @@ class while_running(memoize):
 
 
 def reset():
-    reset_on_stop._reset();
-    reset_on_exit._reset();
-    reset_on_objfile._reset();
-    reset_on_start._reset();
-    reset_on_cont._reset();
-    while_running._reset();
+    reset_on_stop._reset()
+    reset_on_exit._reset()
+    reset_on_objfile._reset()
+    reset_on_start._reset()
+    reset_on_cont._reset()
+    while_running._reset()

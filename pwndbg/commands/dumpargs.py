@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-import pwndbg.commands
+from __future__ import unicode_literals
+
 import pwndbg.arguments
+import pwndbg.commands
 import pwndbg.disasm
+
 
 @pwndbg.commands.Command
 @pwndbg.commands.OnlyWhenRunning

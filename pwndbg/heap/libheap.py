@@ -22,10 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from __future__ import print_function
-import gdb
-import sys
+from __future__ import unicode_literals
+
 import struct
+import sys
 from os import uname
+
+import gdb
 
 # bash color support
 color_support = True

@@ -5,21 +5,26 @@ Functionality for disassmebling code at an address, or at an
 address +/- a few instructions.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import collections
+
+import capstone
+from capstone import *
 
 import gdb
 import pwndbg.arch
 import pwndbg.disasm.arch
 import pwndbg.ida
+import pwndbg.jump
+import pwndbg.memoize
 import pwndbg.memory
 import pwndbg.symbol
-import pwndbg.memoize
-import pwndbg.jump
-import pwndbg.emu.emulator
 
-import capstone
-from capstone import *
-
+try:
+    import pwndbg.emu.emulator
+except:
+    pwndbg.emu = None
 
 disassembler = None
 last_arch    = None
@@ -143,7 +148,7 @@ def near(address, instructions=1, emulate=False):
     emu = None
 
     # If we hit the current instruction, we can do emulation going forward from there.
-    if address == pc and emulate:
+    if address == pc and pwndbg.emu and emulate:
         emu = pwndbg.emu.emulator.Emulator()
 
         # For whatever reason, the first instruction is emulated twice.

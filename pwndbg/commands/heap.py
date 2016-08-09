@@ -1,11 +1,15 @@
 #!/usr/bin/env python
-
 from __future__ import print_function
+from __future__ import unicode_literals
+
+import six
+
 import gdb
-
 import pwndbg.commands
-
-from pwndbg.color import bold, yellow, red, underline
+from pwndbg.color import bold
+from pwndbg.color import red
+from pwndbg.color import underline
+from pwndbg.color import yellow
 
 PREV_INUSE = 1
 IS_MMAPED = 2
@@ -139,9 +143,11 @@ def top_chunk(addr=None):
 
             last_addr = addr
             addr += size
-        print(pwndbg.color.get(last_addr))
+        address = last_addr
     else:
-        print(pwndbg.color.get(main_arena['top']))
+        address = main_arena['top']
+
+    return malloc_chunk(address)
 
 @pwndbg.commands.ParsedCommand
 @pwndbg.commands.OnlyWhenRunning
@@ -149,7 +155,7 @@ def malloc_chunk(addr):
     """
     Prints out the malloc_chunk at the specified address.
     """
-    if not isinstance(addr, int):
+    if not isinstance(addr, six.integer_types):
         addr = int(addr)
 
     chunk = value_from_type('struct malloc_chunk', addr)

@@ -5,11 +5,15 @@ Reading register value from the inferior, and provides a
 standardized interface to registers like "sp" and "pc".
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import collections
 import ctypes
 import re
 import sys
 from types import ModuleType
+
+import six
 
 import gdb
 import pwndbg.arch
@@ -64,7 +68,7 @@ class RegisterSet(object):
                  stack='sp',
                  frame=None,
                  retaddr=tuple(),
-                 flags=tuple(),
+                 flags=dict(),
                  gpr=tuple(),
                  misc=tuple(),
                  args=tuple(),
@@ -81,7 +85,7 @@ class RegisterSet(object):
 
         # In 'common', we don't want to lose the ordering of:
         self.common = []
-        for reg in gpr + (frame, stack, pc):
+        for reg in gpr + (frame, stack, pc) + tuple(flags):
             if reg and reg not in self.common:
                 self.common.append(reg)
 
@@ -93,23 +97,33 @@ class RegisterSet(object):
             yield r
 
 arm = RegisterSet(  retaddr = ('lr',),
-                    flags   = ('cpsr',),
+                    flags   = {'cpsr':{}},
                     gpr     = tuple('r%i' % i for i in range(13)),
                     args    = ('r0','r1','r2','r3'),
                     retval  = 'r0')
 
 aarch64 = RegisterSet(  retaddr = ('lr',),
-                        flags   = ('cpsr',),
+                        flags   = {'cpsr':{}},
                         gpr     = tuple('x%i' % i for i in range(29)),
                         misc    = tuple('w%i' % i for i in range(29)),
                         args    = ('x0','x1','x2','x3'),
                         retval  = 'x0')
 
+x86flags = {'eflags': {
+    'CF':  0,
+    'PF':  2,
+    'AF':  4,
+    'ZF':  6,
+    'SF':  7,
+    'IF':  9,
+    'DF': 10,
+    'OF': 11,
+}}
 
 amd64 = RegisterSet(pc      = 'rip',
                     stack   = 'rsp',
                     frame   = 'rbp',
-                    flags   = ('eflags',),
+                    flags   = x86flags,
                     gpr     = ('rax','rbx','rcx','rdx','rdi','rsi',
                                'r8', 'r9', 'r10','r11','r12',
                                'r13','r14','r15'),
@@ -127,7 +141,7 @@ amd64 = RegisterSet(pc      = 'rip',
 i386 = RegisterSet( pc      = 'eip',
                     stack   = 'esp',
                     frame   = 'ebp',
-                    flags   = ('eflags',),
+                    flags   = x86flags,
                     gpr     = ('eax','ebx','ecx','edx','edi','esi'),
                     misc    =  ('cs','ss','ds','es','fs','gs',
                                 'fsbase', 'gsbase',
@@ -151,7 +165,7 @@ i386 = RegisterSet( pc      = 'eip',
 # r14-r30 Registers used for local variables
 # r31     Used for local variables or "environment pointers"
 powerpc = RegisterSet(  retaddr = ('lr','r0'),
-                        flags   = ('msr','xer'),
+                        flags   = {'msr':{},'xer':{}},
                         gpr     = tuple('r%i' % i for i in range(3,32)),
                         misc    = ('cr','lr','r2'),
                         args    = tuple('r%i' for i in range(3,11)),
@@ -190,7 +204,7 @@ sparc_gp = tuple(['g%i' % i for i in range(1,8)]
 sparc = RegisterSet(stack   = 'o6',
                     frame   = 'i6',
                     retaddr = ('o7',),
-                    flags   = ('psr',),
+                    flags   = {'psr':{}},
                     gpr     = sparc_gp,
                     args    = ('i0','i1','i2','i3','i4','i5'),
                     retval  = 'o0')
@@ -236,7 +250,6 @@ def gdb77_get_register(name):
 def gdb79_get_register(name):
     return gdb.newest_frame().read_register(name)
 
-
 try:
     gdb.Frame.read_register
     get_register = gdb79_get_register
@@ -271,10 +284,10 @@ class module(ModuleType):
 
     @pwndbg.memoize.reset_on_stop
     def __getitem__(self, item):
-        if isinstance(item, int):
+        if isinstance(item, six.integer_types):
             return arch_to_regs[pwndbg.arch.current][item]
 
-        if not isinstance(item, pwndbg.compat.basestring):
+        if not isinstance(item, six.string_types):
             print("Unknown register type: %r" % (item))
             import pdb, traceback
             traceback.print_stack()
@@ -285,7 +298,7 @@ class module(ModuleType):
         item = item.lstrip('$')
         item = getattr(self, item.lower())
 
-        if isinstance(item, (int,long)):
+        if isinstance(item, six.integer_types):
             return int(item) & pwndbg.arch.ptrmask
 
         return item
@@ -314,6 +327,10 @@ class module(ModuleType):
     @property
     def retaddr(self):
         return arch_to_regs[pwndbg.arch.current].retaddr
+
+    @property
+    def flags(self):
+        return arch_to_regs[pwndbg.arch.current].flags
 
     @property
     def stack(self):

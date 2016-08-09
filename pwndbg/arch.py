@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import collections
 import struct
 import sys
+
+from capstone import *
 
 import gdb
 import pwndbg.events
 import pwndbg.memoize
 import pwndbg.regs
 import pwndbg.typeinfo
-
-from capstone import *
 
 current = 'i386'
 qemu    = current
@@ -29,7 +31,16 @@ def fix_arch(arch):
 def update():
     m = sys.modules[__name__]
 
-    m.current = fix_arch(gdb.selected_frame().architecture().name())
+    # GDB 7.7 (Ubuntu Trusty) does not like selected_frame() when EBP/RBP
+    # is not mapped / pounts to an invalid address.
+    #
+    # As a work-around for Trusty users, handle the exception and bail.
+    # This may lead to inaccurate results, but there's not much to be done.
+    try:
+        m.current = fix_arch(gdb.newest_frame().architecture().name())
+    except Exception:
+        return
+
     m.ptrsize = pwndbg.typeinfo.ptrsize
     m.ptrmask = (1 << 8*pwndbg.typeinfo.ptrsize)-1
 
@@ -57,11 +68,10 @@ def pack(integer):
     return struct.pack(fmt, integer & ptrmask)
 
 def unpack(data):
-	return struct.unpack(fmt, data)[0]
+    return struct.unpack(fmt, data)[0]
 
 def signed(integer):
     return unpack(pack(integer), signed=True)
 
 def unsigned(integer):
     return unpack(pack(integer))
-

@@ -1,3 +1,4 @@
-#Embedded file name: /usr/local/google/home/riggle/pwndbg/pwndbg/emu/__init__.py
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import pwndbg.emu.x86

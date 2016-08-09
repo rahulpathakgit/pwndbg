@@ -4,9 +4,11 @@
 Compatibility functionality for Windbg users.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import codecs
-import sys
 import math
+import sys
 
 import gdb
 import pwndbg.arch
@@ -279,8 +281,7 @@ def u(where=None, n=5):
     """
     if where is None:
         where = pwndbg.regs.pc
-    cmd = 'x/%ii %#x' % (int(n), int(where))
-    gdb.execute(cmd)
+    pwndbg.commands.nearpc(where, n)
 
 @pwndbg.commands.Command
 @pwndbg.commands.OnlyWhenRunning

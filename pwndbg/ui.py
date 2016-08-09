@@ -4,6 +4,8 @@
 A few helpers for making things print pretty-like.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import fcntl
 import struct
 import sys
@@ -22,5 +24,5 @@ def banner(title):
     return ("[{:-^%ss}]" % width).format(title)
 
 def addrsz(address):
-	address = int(address) & pwndbg.arch.ptrmask
-	return "%{}x".format(2*pwndbg.arch.ptrsize) % address
+    address = int(address) & pwndbg.arch.ptrmask
+    return "%{}x".format(2*pwndbg.arch.ptrsize) % address

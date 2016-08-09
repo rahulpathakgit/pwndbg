@@ -1,4 +1,6 @@
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import os
 import re
 import sys
@@ -96,7 +98,7 @@ class AUXV(dict):
     def __str__(self):
         return str({k:v for k,v in self.items() if v is not None})
 
-@pwndbg.memoize.reset_on_start
+@pwndbg.memoize.reset_on_objfile
 def get():
     return use_info_auxv() or walk_stack() or AUXV()
 
@@ -149,8 +151,11 @@ def walk_stack():
         # not aligned properly.
         auxv = walk_stack2(1)
 
-    if not auxv['AT_EXECFN']:
-        auxv['AT_EXECFN'] = get_execfn()
+    if not auxv.get('AT_EXECFN', None):
+        try:
+            auxv['AT_EXECFN'] = get_execfn()
+        except gdb.MemoryError:
+            pass
 
     return auxv
 
@@ -158,7 +163,7 @@ def walk_stack2(offset=0):
     sp  = pwndbg.regs.sp
 
     if not sp:
-        return None
+        return AUXV()
 
     #
     # Strategy looks like this:
@@ -205,7 +210,7 @@ def walk_stack2(offset=0):
             break
         p -= 2
     else:
-        return
+        return AUXV()
 
     # If we continue to p back, we should bump into the
     # very end of ENVP (and perhaps ARGV if ENVP is empty).
@@ -229,6 +234,10 @@ def walk_stack2(offset=0):
     return auxv
 
 def get_execfn():
+    # If the stack is not sane, this won't work
+    if not pwndbg.memory.peek(pwndbg.regs.sp):
+        return
+
     # QEMU does not put AT_EXECFN in the Auxiliary Vector
     # on the stack.
     #

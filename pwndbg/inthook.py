@@ -6,6 +6,8 @@ since they cannot directly cast to integer a gdb.Value object that is
 not already an integer type.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import sys
 
 import gdb

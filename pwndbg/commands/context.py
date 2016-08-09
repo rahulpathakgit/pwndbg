@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-import gdb
+from __future__ import unicode_literals
+
 import sys
 
+import gdb
 import pwndbg.arguments
 import pwndbg.chain
 import pwndbg.color
 import pwndbg.commands
 import pwndbg.commands.nearpc
 import pwndbg.commands.telescope
+import pwndbg.config
 import pwndbg.disasm
 import pwndbg.events
 import pwndbg.ida
@@ -17,6 +20,7 @@ import pwndbg.regs
 import pwndbg.symbol
 import pwndbg.ui
 import pwndbg.vmmap
+
 
 # @pwndbg.events.stop
 @pwndbg.commands.Command
@@ -59,11 +63,17 @@ def regs(*regs):
     '''Print out all registers and enhance the information.'''
     print('\n'.join(get_regs(*regs)))
 
+pwndbg.config.Parameter('show-flags', False, 'whether to show flags registers')
+pwndbg.config.Parameter('colored-flags', False, 'whether to colorize flags registers')
+
 def get_regs(*regs):
     result = []
 
     if not regs:
         regs = pwndbg.regs.gpr + (pwndbg.regs.frame, pwndbg.regs.current.stack, pwndbg.regs.current.pc)
+
+    if pwndbg.config.show_flags:
+        regs += tuple(pwndbg.regs.flags)
 
     changed = pwndbg.regs.changed
 
@@ -83,15 +93,46 @@ def get_regs(*regs):
         # Show a dot next to the register if it changed
         m = ' ' if reg not in changed else '*'
 
-        result.append("%s%s %s" % (m, regname, pwndbg.chain.format(value)))
+        if reg not in pwndbg.regs.flags:
+            desc = pwndbg.chain.format(value)
+
+        else:
+            names = []
+            desc  = '%#x' % value
+            last  = pwndbg.regs.last.get(reg, 0) or 0
+            flags = pwndbg.regs.flags[reg]
+
+            for name, bit in sorted(flags.items()):
+                bit = 1<<bit
+                if value & bit:
+                    name = name.upper()
+                    name = pwndbg.color.bold(name)
+                    if pwndbg.config.colored_flags:
+                        name = pwndbg.color.green(name)
+                else:
+                    name = name.lower()
+                    if pwndbg.config.colored_flags:
+                        name = pwndbg.color.red(name)
+
+                if value & bit != last & bit:
+                    name = pwndbg.color.underline(name)
+                names.append(name)
+
+            if names:
+                desc = '%s [ %s ]' % (desc, ' '.join(names))
+
+        result.append("%s%s %s" % (m, regname, desc))
 
     return result
 
-
+pwndbg.config.Parameter('emulate', True, '''
+Unicorn emulation of code near the current instruction
+''')
 
 def context_code():
     banner = [pwndbg.color.blue(pwndbg.ui.banner("code"))]
-    result = pwndbg.commands.nearpc.nearpc(to_string=True, emulate=True)
+    emulate = bool(pwndbg.config.emulate)
+    result = pwndbg.commands.nearpc.nearpc(to_string=True, emulate=emulate)
 
     # If we didn't disassemble backward, try to make sure
     # that the amount of screen space taken is roughly constant.
@@ -99,6 +140,8 @@ def context_code():
         result.append('')
 
     return banner + result
+
+pwndbg.config.Parameter('highlight-source', True, 'whether to highlight the closest source line')
 
 def context_source():
     try:
@@ -119,11 +162,19 @@ def context_source():
 
         # If it starts on line 1, it's not really using the
         # correct source code.
-        if not source or source.startswith('1\t'):
+        if not source or closest_line <= 1:
             return []
 
+        # highlight the current code line
+        source_lines = source.splitlines()
+        if pwndbg.config.highlight_source:
+            for i in range(len(source_lines)):
+                if source_lines[i].startswith('%s\t' % closest_line):
+                    source_lines[i] = pwndbg.color.highlight(source_lines[i])
+                    break
+
         banner = [pwndbg.color.blue(pwndbg.ui.banner("code"))]
-        banner.extend(source.splitlines())
+        banner.extend(source_lines)
         return banner
     except:
         pass

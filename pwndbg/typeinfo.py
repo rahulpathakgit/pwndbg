@@ -5,11 +5,15 @@ Common types, and routines for manually loading types from file
 via GCC.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import glob
 import os
 import subprocess
 import sys
 import tempfile
+
+import six
 
 import gdb
 import pwndbg.events
