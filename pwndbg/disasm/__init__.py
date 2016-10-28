@@ -4,15 +4,17 @@
 Functionality for disassmebling code at an address, or at an
 address +/- a few instructions.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
 import collections
 
 import capstone
+import gdb
 from capstone import *
 
-import gdb
 import pwndbg.arch
 import pwndbg.disasm.arch
 import pwndbg.ida

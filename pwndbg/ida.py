@@ -5,17 +5,21 @@ Talks to an XMLRPC server running inside of an active IDA Pro instance,
 in order to query it about the database.  Allows symbol resolution and
 interactive debugging.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
 import errno
 import functools
+import inspect
 import os
 import socket
 import traceback
 from contextlib import closing
 
 import gdb
+
 import pwndbg.arch
 import pwndbg.compat
 import pwndbg.elf
@@ -90,6 +94,13 @@ def r2l(addr):
         raise Exception("Can't find EXE base")
     result = (addr - base() + int(exe.address)) & pwndbg.arch.ptrmask
     return result
+
+def remote(function):
+    """Runs the provided function in IDA's interpreter.
+
+    The function must be self-contained and not reference any
+    global variables."""
+
 
 @pwndbg.memoize.reset_on_objfile
 def base():
@@ -186,7 +197,7 @@ def UpdateBreakpoints():
         if not pwndbg.memory.peek(bp):
             continue
 
-        bp = gdb.Breakpoint('*' + hex(bp))
+        bp = gdb.Breakpoint('*' + hex(int(bp)))
         _breakpoints.append(bp)
         # print(_breakpoints)
 

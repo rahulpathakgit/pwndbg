@@ -7,6 +7,8 @@ vice-versa.
 Uses IDA when available if there isn't sufficient symbol
 information available.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -18,9 +20,9 @@ import elftools.common.exceptions
 import elftools.elf.constants
 import elftools.elf.elffile
 import elftools.elf.segments
+import gdb
 import six
 
-import gdb
 import pwndbg.elf
 import pwndbg.events
 import pwndbg.file

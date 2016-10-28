@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -7,6 +11,7 @@ import subprocess
 import tempfile
 
 import gdb
+
 import pwndbg.commands
 import pwndbg.vmmap
 
@@ -41,5 +46,3 @@ def ropper(argument):
             io = subprocess.call(cmd)
         except Exception:
             print("Could not run ropper.  Please ensure it's installed and in $PATH.")
-
-        

@@ -4,6 +4,8 @@
 Reading register value from the inferior, and provides a
 standardized interface to registers like "sp" and "pc".
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -13,9 +15,9 @@ import re
 import sys
 from types import ModuleType
 
+import gdb
 import six
 
-import gdb
 import pwndbg.arch
 import pwndbg.compat
 import pwndbg.events
@@ -89,7 +91,7 @@ class RegisterSet(object):
             if reg and reg not in self.common:
                 self.common.append(reg)
 
-        self.all = set(i for i in misc) | set(flags) | set(self.common)
+        self.all = set(i for i in misc) | set(flags) | set(self.retaddr) | set(self.common)
         self.all -= {None}
 
     def __iter__(self):
@@ -239,7 +241,6 @@ arch_to_regs = {
     'arm': arm,
     'aarch64': aarch64,
     'powerpc': powerpc,
-    'powerpc': powerpc,
 }
 
 @pwndbg.proc.OnlyWhenRunning
@@ -349,6 +350,8 @@ class module(ModuleType):
                 continue
             elif isinstance(regset, (list, tuple)):
                 retval.extend(regset)
+            elif isinstance(regset, dict):
+                retval.extend(regset.keys())
             else:
                 retval.append(regset)
         return retval
@@ -422,3 +425,5 @@ sys.modules[__name__] = module(__name__, '')
 def update_last():
     M = sys.modules[__name__]
     M.last = {k:M[k] for k in M.common}
+    if pwndbg.config.show_retaddr_reg:
+        M.last.update({k:M[k] for k in M.retaddr})

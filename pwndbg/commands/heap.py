@@ -1,10 +1,15 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import gdb
 import six
 
-import gdb
+import pwndbg.color.memory as M
 import pwndbg.commands
 from pwndbg.color import bold
 from pwndbg.color import red
@@ -21,7 +26,9 @@ def value_from_type(type_name, addr):
 
 def get_main_arena(addr=None):
     if addr == None:
-        main_arena = gdb.lookup_symbol('main_arena')[0].value()
+        main_arena = gdb.lookup_symbol('main_arena')[0]
+        if main_arena is not None:
+            main_arena = main_arena.value()
     else:
         main_arena = value_from_type('struct malloc_state', addr)
 
@@ -62,8 +69,8 @@ def heap(addr=None):
     top = main_arena['top']
     last_remainder = main_arena['last_remainder']
 
-    print(bold('Top Chunk: ') + pwndbg.color.get(top))
-    print(bold('Last Remainder: ') + pwndbg.color.get(last_remainder))
+    print(bold('Top Chunk: ') + M.get(top))
+    print(bold('Last Remainder: ') + M.get(last_remainder))
     print()
 
     # Print out all chunks on the heap
@@ -75,6 +82,8 @@ def heap(addr=None):
 
         # Clear the bottom 3 bits
         size &= ~7
+        if size == 0:
+            break
         addr += size
 
 @pwndbg.commands.ParsedCommand
@@ -104,13 +113,14 @@ def bins(addr=None):
     bins = main_arena['bins']
 
     size_t_size = pwndbg.typeinfo.load('size_t').sizeof
-    num_fastbins = int(fastbins.type.sizeof / fastbins.type.target().sizeof)
+    num_fastbins = 7
     num_bins = int(bins.type.sizeof / bins.type.target().sizeof)
     fd_field_offset = 2 * size_t_size
 
     print(underline(yellow('fastbins')))
+    size = 2 * size_t_size
     for i in range(num_fastbins):
-        size = 2 * size_t_size * (i + 1)
+        size += 2 * size_t_size
         chain = pwndbg.chain.format(int(fastbins[i]), offset=fd_field_offset)
         print((bold(size) + ': ').ljust(13) + chain)
 
@@ -143,6 +153,7 @@ def top_chunk(addr=None):
 
             last_addr = addr
             addr += size
+            addr += size
         address = last_addr
     else:
         address = main_arena['top']
@@ -164,7 +175,7 @@ def malloc_chunk(addr):
     is_mmaped = (size & IS_MMAPED) == 1
     non_main_arena = (size & NON_MAIN_ARENA) == 1
 
-    header = pwndbg.color.get(addr)
+    header = M.get(addr)
     if prev_inuse:
         header += yellow(' PREV_INUSE')
     if is_mmaped:

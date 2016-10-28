@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
+import gdb
 from elftools.elf.elffile import ELFFile
 
-import gdb
 import pwndbg.commands
 
 
@@ -27,11 +30,11 @@ def elfheader():
                 continue
 
             size = section['sh_size']
-            sections.append((start, start + size, section.name.decode('ascii')))
+            sections.append((start, start + size, section.name))
 
         sections.sort()
         for start, end, name in sections:
-            print('%#x - %#x %s' % (start, end, name))
+            print('%#x - %#x ' % (start, end), name)
 
 @pwndbg.commands.Command
 def gotplt():
@@ -48,8 +51,8 @@ def plt():
     print_symbols_in_section('.plt', '@plt')
 
 def get_section_bounds(section_name):
-    section_name = section_name.encode('ascii')
-    with open(pwndbg.proc.exe, 'rb') as f:
+    local_path = pwndbg.file.get_file(pwndbg.proc.exe)
+    with open(local_path, 'rb') as f:
         elffile = ELFFile(f)
 
         section = elffile.get_section_by_name(section_name)

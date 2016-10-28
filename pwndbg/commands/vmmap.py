@@ -3,13 +3,15 @@
 """
 Command to print the vitual memory map a la /proc/self/maps.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import gdb
 import six
 
-import gdb
-import pwndbg.color
+import pwndbg.color.memory as M
 import pwndbg.commands
 import pwndbg.compat
 import pwndbg.vmmap
@@ -30,7 +32,7 @@ def vmmap(map=None):
     elif isinstance(map, six.integer_types + (gdb.Value,)):
         int_map = int(map)
 
-    print(pwndbg.color.legend())
+    print(M.legend())
 
     for page in pwndbg.vmmap.get():
         if str_map and str_map not in page.objfile:
@@ -38,4 +40,4 @@ def vmmap(map=None):
         if int_map and int_map not in page:
             continue
 
-        print(pwndbg.color.get(page.vaddr, text=str(page)))
+        print(M.get(page.vaddr, text=str(page)))

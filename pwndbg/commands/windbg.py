@@ -3,6 +3,8 @@
 """
 Compatibility functionality for Windbg users.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -11,6 +13,7 @@ import math
 import sys
 
 import gdb
+
 import pwndbg.arch
 import pwndbg.commands
 import pwndbg.memory
@@ -173,6 +176,10 @@ def eX(size, address, data, hex=True):
             data    = codecs.decode(bytestr, 'hex')
         else:
             data    = bytestr
+
+        if pwndbg.arch.endian == 'little':
+            data = data[::-1]
+
         pwndbg.memory.write(address + (i * size), data)
 
 @pwndbg.commands.ParsedCommand

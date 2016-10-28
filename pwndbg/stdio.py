@@ -4,6 +4,8 @@
 Provides functionality to circumvent GDB's hooks on sys.stdin and sys.stdout
 which prevent output from appearing on-screen inside of certain event handlers.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -13,6 +15,7 @@ import os
 import sys
 
 import gdb
+
 import pwndbg.compat
 
 

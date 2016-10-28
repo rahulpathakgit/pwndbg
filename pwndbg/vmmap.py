@@ -7,13 +7,18 @@ address ranges with various ELF files and permissions.
 The reason that we need robustness is that not every operating
 system has /proc/$$/maps, which backs 'info proc mapping'.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import sys
 
 import gdb
+
 import pwndbg.compat
+import pwndbg.elf
 import pwndbg.events
 import pwndbg.file
 import pwndbg.memoize
@@ -316,21 +321,25 @@ def info_auxv(skip_exe=False):
         pages.extend(pwndbg.elf.map(entry or phdr, exe_name))
 
     if base:
-        pages.append(find_boundaries(base, '[linker]'))
+        pages.extend(pwndbg.elf.map(base, '[linker]'))
 
     if vdso:
-        pages.append(find_boundaries(vdso, '[vdso]'))
+        pages.extend(pwndbg.elf.map(vdso, '[vdso]'))
 
     return tuple(sorted(pages))
 
 
-def find_boundaries(addr, name=''):
+def find_boundaries(addr, name='', min=0):
     """
     Given a single address, find all contiguous pages
     which are mapped.
     """
     start = pwndbg.memory.find_lower_boundary(addr)
     end   = pwndbg.memory.find_upper_boundary(addr)
+
+    if start < min:
+        start = min
+
     return pwndbg.memory.Page(start, end-start, 4, 0, name)
 
 aslr = False
@@ -381,3 +390,9 @@ def check_aslr():
         vmmap.aslr = True
 
     return vmmap.aslr
+
+@pwndbg.events.cont
+def mark_pc_as_executable():
+    mapping = find(pwndbg.regs.pc)
+    if mapping and not mapping.execute:
+        mapping.flags |= os.X_OK

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -9,6 +11,7 @@ import sys
 import traceback
 
 import gdb
+
 import pwndbg.chain
 import pwndbg.color
 import pwndbg.enhance
@@ -79,7 +82,7 @@ class _ParsedCommandPrefix(_ParsedCommand):
     def __init__(self, function, inc=True, prefix=True):
         super(_ParsedCommand, self).__init__(function, inc, prefix)
 
-def fix(arg, sloppy=False, quiet=False):
+def fix(arg, sloppy=False, quiet=True):
     if isinstance(arg, gdb.Value):
         return arg
 

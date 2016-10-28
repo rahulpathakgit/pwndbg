@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -6,6 +10,7 @@ import datetime
 import os
 
 import gdb
+
 import pwndbg.commands
 import pwndbg.commands.context
 import pwndbg.ida

@@ -3,6 +3,8 @@
 """
 Prints structures in a manner similar to Windbg's "dt" command.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -13,6 +15,7 @@ import subprocess
 import tempfile
 
 import gdb
+
 import pwndbg.memory
 import pwndbg.typeinfo
 

@@ -3,12 +3,15 @@
 """
 Search the address space for byte patterns.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
 import struct
 
 import gdb
+
 import pwndbg.arch
 import pwndbg.memory
 import pwndbg.typeinfo

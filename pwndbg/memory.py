@@ -3,12 +3,16 @@
 """
 Reading, writing, and describing memory.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import traceback
 
 import gdb
+
 import pwndbg.arch
 import pwndbg.compat
 import pwndbg.typeinfo
@@ -185,9 +189,9 @@ class Page(object):
     @property
     def permstr(self):
         flags = self.flags
-        return ''.join(['r' if flags & 4 else '-',
-                        'w' if flags & 2 else '-',
-                        'x' if flags & 1 else '-',
+        return ''.join(['r' if flags & os.R_OK else '-',
+                        'w' if flags & os.W_OK else '-',
+                        'x' if flags & os.X_OK else '-',
                         'p'])
     def __str__(self):
         width = 2 + 2*pwndbg.typeinfo.ptrsize

@@ -1,6 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Emulation assistance from Unicorn.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -8,9 +12,9 @@ import binascii
 import inspect
 
 import capstone as C
+import gdb
 import unicorn as U
 
-import gdb
 import pwndbg.arch
 import pwndbg.disasm
 import pwndbg.emu.emulator

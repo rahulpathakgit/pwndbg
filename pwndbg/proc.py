@@ -4,6 +4,8 @@
 Provides values which would be available from /proc which
 are not fulfilled by other modules.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -12,6 +14,7 @@ import sys
 from types import ModuleType
 
 import gdb
+
 import pwndbg.memoize
 import pwndbg.qemu
 

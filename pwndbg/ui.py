@@ -3,6 +3,8 @@
 """
 A few helpers for making things print pretty-like.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -12,7 +14,11 @@ import sys
 import termios
 
 import pwndbg.arch
+import pwndbg.color.context as C
+import pwndbg.color.theme as theme
+import pwndbg.config as config
 
+theme.Parameter('banner-separator', '─', 'repeated banner separator character')
 
 def banner(title):
     title = title.upper()
@@ -21,7 +27,7 @@ def banner(title):
     except:
         width = 80
     width -= 2
-    return ("[{:-^%ss}]" % width).format(title)
+    return C.banner(("[{:%s^%ss}]" % (config.banner_separator, width)).format(title))
 
 def addrsz(address):
     address = int(address) & pwndbg.arch.ptrmask

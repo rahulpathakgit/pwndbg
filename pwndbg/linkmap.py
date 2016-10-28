@@ -5,10 +5,13 @@ Describes the standard Linux glibc/eglibc link_map, and
 allows enumeration of loaded modules under qemu-user where
 /proc/X/maps may lie or be unavialable.
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
 import gdb
+
 import pwndbg.elf
 import pwndbg.events
 import pwndbg.memoize

@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
 import sys
 
 import gdb
+import six
+
 import pwndbg.android
 import pwndbg.arch
 import pwndbg.arguments
@@ -38,6 +42,7 @@ import pwndbg.commands.segments
 import pwndbg.commands.shell
 import pwndbg.commands.start
 import pwndbg.commands.telescope
+import pwndbg.commands.theme
 import pwndbg.commands.vmmap
 import pwndbg.commands.windbg
 import pwndbg.commands.xor
@@ -55,6 +60,7 @@ import pwndbg.inthook
 import pwndbg.memory
 import pwndbg.net
 import pwndbg.proc
+import pwndbg.prompt
 import pwndbg.regs
 import pwndbg.stack
 import pwndbg.stdio
@@ -67,6 +73,12 @@ try:
 except:
     pass
 
+# this is an unconventional workaround to
+# support unicode printing for python2
+# https://github.com/pwndbg/pwndbg/issues/117
+if six.PY2:
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
 
 
 __all__ = [
@@ -109,7 +121,6 @@ prompt = pwndbg.color.bold(prompt)
 pre_commands = """
 set confirm off
 set verbose off
-set output-radix 0x10
 set prompt %s
 set height 0
 set history expansion on
@@ -120,7 +131,6 @@ set step-mode on
 set print pretty on
 set width 0
 set print elements 15
-set input-radix 16
 handle SIGALRM nostop print nopass
 handle SIGBUS  stop   print nopass
 handle SIGPIPE nostop print nopass
@@ -129,27 +139,3 @@ handle SIGSEGV stop   print nopass
 
 for line in pre_commands.strip().splitlines():
     gdb.execute(line)
-
-msg = "Loaded %i commands.  Type pwndbg for a list." % len(pwndbg.commands._Command.commands)
-print(pwndbg.color.red(msg))
-
-cur = (gdb.selected_inferior(), gdb.selected_thread())
-
-def prompt_hook(*a):
-    global cur
-    new = (gdb.selected_inferior(), gdb.selected_thread())
-
-    if cur != new:
-        pwndbg.events.after_reload()
-        cur = new
-
-    if pwndbg.proc.alive:
-        prompt_hook_on_stop(*a)
-
-
-@pwndbg.memoize.reset_on_stop
-def prompt_hook_on_stop(*a):
-    with pwndbg.stdio.stdio:
-        pwndbg.commands.context.context()
-
-gdb.prompt_hook = prompt_hook

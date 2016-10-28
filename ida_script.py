@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 
 import datetime
@@ -59,7 +61,7 @@ server = SimpleXMLRPCServer(('127.0.0.1', port), logRequests=True, allow_none=Tr
 register_module(idc)
 register_module(idautils)
 register_module(idaapi)
-server.register_function(lambda a: eval(*a, globals(), locals()), 'eval')
+server.register_function(lambda a: eval(a, globals(), locals()), 'eval')
 server.register_introspection_functions()
 
 thread = threading.Thread(target=server.serve_forever)
